@@ -12,7 +12,7 @@ def execute_program(mem):
         elif op_code == 2:
             mem[destination_index] = parameter1 * parameter2
         else:
-            raise Exception("Invalid opCode" + op_code)
+            raise Exception("Invalid op_code" + str(op_code))
 
         pointer += 4
 
