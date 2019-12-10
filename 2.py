@@ -1,22 +1,4 @@
-def execute_program(mem):
-    pointer = 0
-    while mem[pointer] != 99:
-
-        op_code = mem[pointer]
-        parameter1 = mem[mem[pointer + 1]]
-        parameter2 = mem[mem[pointer + 2]]
-        destination_index = mem[pointer + 3]
-
-        if op_code == 1:
-            mem[destination_index] = parameter1 + parameter2
-        elif op_code == 2:
-            mem[destination_index] = parameter1 * parameter2
-        else:
-            raise Exception("Invalid op_code" + str(op_code))
-
-        pointer += 4
-
-    return mem[0]
+import intcode
 
 
 program = [1, 0, 0, 3, 1, 1, 2, 3, 1, 3, 4, 3, 1, 5, 0, 3, 2, 1, 10, 19, 1, 6, 19, 23, 1, 10, 23, 27, 2, 27, 13, 31, 1,
@@ -30,13 +12,15 @@ memory = program.copy()
 memory[1] = 12
 memory[2] = 2
 
-print(execute_program(memory))
+intcode.execute_program(memory, None, None)
+print(memory[0])
 
 for i in range(0, 99):
     for j in range(0, 99):
         memory = program.copy()
         memory[1] = i
         memory[2] = j
-        if execute_program(memory) == 19690720:
+        intcode.execute_program(memory, None, None)
+        if memory[0] == 19690720:
             print(100 * i + j)
             exit(1)
