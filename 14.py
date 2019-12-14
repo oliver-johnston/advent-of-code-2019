@@ -61,6 +61,19 @@ reaction_dict = dict()
 for r in reactions:
     reaction_dict[r.output_chemical.symbol] = r
 
-fuel = get_ore(1, "FUEL", reaction_dict, dict())
+one_fuel = get_ore(1, "FUEL", reaction_dict, dict())
+
+print(one_fuel)
+
+
+ore = 1000000000000
+fuel = 0
+
+surplus = dict()
+
+while ore >= one_fuel:
+    estimate = math.floor(ore / one_fuel)
+    ore -= get_ore(estimate, "FUEL", reaction_dict, surplus)
+    fuel += estimate
 
 print(fuel)
