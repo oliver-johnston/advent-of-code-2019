@@ -1,5 +1,3 @@
-import string
-
 keys = set("abcdefghijklmnopqrstuvwxyz")
 doors = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -88,27 +86,45 @@ key_nodes = list(filter(lambda node: node.letter in keys or node.letter == '@', 
 
 print("Calculating paths for {} nodes, {} keys".format(len(nodes), len(key_nodes)))
 
-paths = []
-for n in key_nodes:
-    paths = paths + discover_paths(n, nodes)
+starts = [n for n in nodes.values() if n.letter == '@']
+subsets = [discover_paths(s, nodes) for s in starts]
 
-print("Calculated {} paths".format(len(paths)))
+droid_paths = []
+for s in subsets:
+    keys_in_subset = [p.destination for p in s]
+    nodes_in_subset = [n for n in nodes.values() if n.letter in keys_in_subset]
+    for n in nodes_in_subset:
+        s = s + discover_paths(n, nodes)
+    droid_paths.append(s)
 
+start = "|".join(["@" for _ in droid_paths])
 routes = dict()
-routes["@"] = 0
-queue = ['@']
+routes[start] = 0
+queue = [start]
 while len(queue) > 0:
     cur = queue.pop(0)
     distance_so_far = routes[cur]
+    droid_routes = cur.split("|")
 
-    cur_key = cur[0]
-    to_visit = [p for p in paths if p.source == cur_key
-                and p.destination not in cur
-                and all(map(lambda k: k in cur, p.keys))]
-    for x in to_visit:
-        next = x.destination + "".join(sorted(cur))
-        if next not in routes:
-            queue.append(next)
-        routes[next] = min(routes.get(next, 99999999), distance_so_far + x.distance)
+    for droid_num in range(0, len(droid_routes)):
+        cur_droid_route = droid_routes[droid_num]
+        paths = droid_paths[droid_num]
+        cur_key = cur_droid_route[0]
+        to_visit = [p for p in paths if p.source == cur_key
+                    and p.destination not in cur
+                    and all(map(lambda k: k in cur, p.keys))]
+        for x in to_visit:
+            next_droid = x.destination + "".join(sorted(cur_droid_route))
+            next_droids = []
+            for i in range(0, len(droid_routes)):
+                if i == droid_num:
+                    next_droids.append(next_droid)
+                else:
+                    next_droids.append(droid_routes[i])
+            next = "|".join(next_droids)
+            if next not in routes:
+                queue.append(next)
+            routes[next] = min(routes.get(next, 99999999), distance_so_far + x.distance)
 
-print(min([routes[r] for r in routes if len(r) == len(key_nodes)]))
+max_len = max([len(r1) for r1 in routes])
+print(min([routes[r] for r in routes if len(r) == max_len]))
