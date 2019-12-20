@@ -25,6 +25,15 @@ class Path:
         return "{} -> {} = {} ({})".format(self.source, self.destination, self.distance, self.keys)
 
 
+class Frontier:
+    def __init__(self, node, keys):
+        self.keys = keys
+        self.node = node
+
+    def __repr__(self):
+        return "{} ({})".format(self.node, self.keys)
+
+
 def get_nodes():
     fp = open("18.txt")
     data = fp.read()
@@ -42,35 +51,36 @@ def get_nodes():
     return result
 
 
-def get_paths_to_keys(source, cur_node, all_nodes, distance_so_far, keys_needed, visited):
+def discover_paths(node, all_nodes):
     global keys, doors
-    if (cur_node.x, cur_node.y) in visited:
-        return []
+    frontiers = [Frontier(node, [])]
+    paths = []
+    distance = 0
+    visited = set()
+    while len(frontiers) > 0:
+        next_frontiers = []
+        for f in frontiers:
+            if (f.node.x, f.node.y) in visited:
+                continue
 
-    next_paths = []
-    visited = set(list(visited) + [(cur_node.x, cur_node.y)])
-    if cur_node.letter in keys and cur_node.letter != source:
-        next_paths = next_paths + [Path(source, cur_node.letter, distance_so_far, keys_needed)]
+            visited.add((f.node.x, f.node.y))
 
-    if cur_node.letter in doors:
-        keys_needed = set(list(keys_needed) + [chr(ord(cur_node.letter) + 32)])
+            keys_needed = f.keys
+            if f.node.letter in keys and f.node != node:
+                paths.append(Path(node.letter, f.node.letter, distance, keys_needed))
+                keys_needed = keys_needed + [f.node.letter]
+            elif f.node.letter in doors:
+                keys_needed = keys_needed + [chr(ord(f.node.letter) + 32)]
 
-    if cur_node.letter in keys:
-        keys_needed = set(list(keys_needed) + [cur_node.letter])
-
-    points = [(cur_node.x + 1, cur_node.y),
-              (cur_node.x - 1, cur_node.y),
-              (cur_node.x, cur_node.y + 1),
-              (cur_node.x, cur_node.y - 1)]
-    next_nodes = [all_nodes[coord] for coord in points if coord in all_nodes]
-    for n in next_nodes:
-        next_paths = next_paths + get_paths_to_keys(source,
-                                                    n,
-                                                    all_nodes,
-                                                    distance_so_far + 1,
-                                                    keys_needed,
-                                                    visited)
-    return next_paths
+            points = [(f.node.x + 1, f.node.y),
+                      (f.node.x - 1, f.node.y),
+                      (f.node.x, f.node.y + 1),
+                      (f.node.x, f.node.y - 1)]
+            next_nodes = [all_nodes[coord] for coord in points if coord in all_nodes]
+            next_frontiers = next_frontiers + [Frontier(n, keys_needed) for n in next_nodes]
+        frontiers = next_frontiers
+        distance += 1
+    return paths
 
 
 nodes = get_nodes()
@@ -80,7 +90,7 @@ print("Calculating paths for {} nodes, {} keys".format(len(nodes), len(key_nodes
 
 paths = []
 for n in key_nodes:
-    paths = paths + get_paths_to_keys(n.letter, n, nodes, 0, set(), set())
+    paths = paths + discover_paths(n, nodes)
 
 print("Calculated {} paths".format(len(paths)))
 
