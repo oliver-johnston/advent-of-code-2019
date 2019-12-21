@@ -25,18 +25,18 @@ class Springdroid:
             print(chr(o), end="")
 
 
-Springdroid(["OR A J",
-             "AND C J",
-             "NOT J J",
-             "AND D J",
+Springdroid(["OR A J",  # J = land at A
+             "AND C J", # J = land at A and C
+             "NOT J J", # J = hole at A or C
+             "AND D J", # J = (hole at A or C) and land at D
              "WALK"]).run()
 
-Springdroid(["OR A J",
-             "AND B J",
-             "AND C J",
-             "NOT J J",
-             "AND D J",
-             "OR E T",
-             "OR H T",
-             "AND T J",
+Springdroid(["OR A J",  # J = land at A
+             "AND B J", # J = land at A and B
+             "AND C J", # J = land at A and B and C
+             "NOT J J", # J = hole at A or B or C
+             "AND D J", # J = (hole at A or B or C) and land at D
+             "OR E T",  # T = land at E
+             "OR H T",  # T = land at E or H
+             "AND T J", # J = (hole at A or B or C) and land at D and (land at E or H)
              "RUN"]).run()
